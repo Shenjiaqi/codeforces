@@ -1,0 +1,3 @@
+思路:树状数组+multimap
+由于multimap的iterator相减貌似不管用，因此加上了树状数组
+树状数组实现写错
