@@ -1,0 +1,33 @@
+3 3
+50 50 50
+
+Output
+
+7
+
+Input
+
+1 1
+100
+
+Output
+
+1
+
+Input
+
+2 1
+100 100
+
+Output
+
+2
+
+Input
+
+3 3
+0 0 0
+
+Output
+
+1
