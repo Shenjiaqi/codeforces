@@ -1,0 +1,122 @@
+#include <cstdio>
+#include <queue>
+#include <list>
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <map>
+#include <stack>
+#include <utility>
+using namespace std;
+const int N = 1e5 + 7;
+const int inf = 1e7;
+struct ss
+{
+  int l0,l1,l2;
+  ss(int a, int b ,int c){ l0 = a, l1 = b, l2 = c;};
+};
+int main()
+{
+  int n;
+  scanf("%d", &n);
+  vector<int> array[3];
+  map<int,int> hash;
+  for( int i = 0 ; i < 3 ; ++i )
+    {
+      for( int j = 0 ; j < n ; ++j )
+	{
+	  int v;
+	  scanf("%d", &v);
+	  array[i].push_back(v);
+	  hash[v] = 0;
+	}
+    }
+  int cnt = 0;
+  for( typeof( hash.begin() ) i = hash.begin(); i != hash.end() ; ++i )
+    i->second = ++cnt;
+  vector<int> vis[3];
+  vector<pair<int,int> > appSeq[3];
+  for( int i = 0 ; i < 3; ++i )
+    {
+      vis[i].resize( cnt + 1 );
+      appSeq[i].push_back( make_pair(0,0) );
+      for( int j = 0 ; j < n ; ++j )
+	{
+	  int val = hash[ array[i][j] ] ;
+	  if( vis[i][val] == 0 )
+	  {
+	    vis[i][val] = appSeq[i].size();
+	    appSeq[i].push_back( make_pair( val, j + 1) );
+	  }
+	}
+    }
+  int s[3] = {0};
+  for( int i = 1 ; i <= cnt; ++i )
+    {
+      int count = 0, ci = 0;
+      for( int j = 0 ; j < 3; ++j )
+	if( vis[j][i] != 0 )
+	  ++count, ci = j;
+      if( count == 1 )
+	s[ci] = max( s[ci], vis[ci][i] );
+    }
+  queue<int> jmpList;
+  for( int i = appSeq[0].size() - 1, j = s[1]; ; --i )
+    {
+      jmpList.push(j);
+      if( i < s[0] )
+	break;
+      int val = appSeq[0][i].first;
+      int posIn1 = vis[1][val];
+      if( posIn1 != 0 )
+	j = max(j, posIn1);
+      else break;
+    }
+  queue<ss> candList;
+  for( int i = appSeq[2].size() - 1, j = s[0], k = s[1]; i >= s[2] ; --i )
+    {
+      candList.push( ss(j, k, i ) );
+      int passVal = appSeq[2][i].first;
+      int posIn0 = vis[0][passVal];
+      j = max( j, posIn0 == 0 ? inf : posIn0 );
+      int posIn1 = vis[1][passVal];
+      k = max( k, posIn1 == 0 ? inf : posIn1 );
+    }
+
+  int ans = 3 * n + 1;
+  stack<ss> rCandList;
+  for( int i = appSeq[0].size() - 1, j = s[1] ; 
+       i >= s[0] ; --i )
+    {
+      for( ; !candList.empty() && candList.front().l1 <= j ; 
+	   candList.pop() )
+	{
+	  rCandList.push( candList.front() );
+	}
+      for( ; !candList.empty() && candList.front().l0 > i ; )
+	candList.pop();
+      for( ; !rCandList.empty() && rCandList.top().l0 > i ; )
+	rCandList.pop();
+      if( !rCandList.empty() )
+	{
+	  int idx = rCandList.top().l2;
+	  int tmpAns = appSeq[2][idx].second;
+	  tmpAns += appSeq[0][i].second + appSeq[1][j].second;
+	  ans = min( ans, tmpAns);
+	}
+      if( !candList.empty() )
+	{
+	  if( jmpList.empty() || candList.front().l1 < jmpList.front() )
+	    j = candList.front().l1, ++i;
+	  else
+	    {
+	      j = max( j, jmpList.front() );
+	      jmpList.pop();
+	    }
+	}
+      else if( rCandList.empty() )
+	break;
+    }
+  printf("%d", ans);
+  return 0;
+}
