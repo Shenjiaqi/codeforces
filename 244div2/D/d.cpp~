@@ -1,0 +1,134 @@
+#include <algorithm>
+#include <string>
+#include <vector>
+#include <cmath>
+#include <map>
+#include <fstream>
+#include <cassert>
+#include <set>
+#include <queue>
+#include <iostream>
+#include <utility>
+#include <stack>
+#include <complex>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <list>
+#include <functional>
+#include <cctype>
+#include <unordered_map>
+using namespace std;
+typedef long double ld;
+typedef long long ll;
+typedef pair<int,int> ppi;
+typedef pair<ll,ll> ppl;
+typedef pair<double,double> ppd;
+#define PB push_back
+#define MP make_pair
+#define FIR first
+#define SEC second
+#define FOR(a,b,c) for(int a=(b);a<(c);++a)
+#define FR(a,b) for(typeof(b.begin()) a=b.begin();a!=b.end();++a)
+const int N = 5007;
+char s[2][N];
+int len[2];
+int h[2][N];
+const int mod = 1e9 + 7;
+int addM( int a, int b)
+{
+  return ( (ll)a + (ll)b ) % mod;
+}
+int subM( int a, int b)
+{
+  return addM( ( (ll)a - (ll)b ) % mod, mod );
+}
+int mulM( int a, int b)
+{
+  return ( (ll)a * (ll)b ) % mod;
+}
+int hasH( int a, int b)
+{
+  return addM( mulM( a, 37), b);
+}
+int main()
+{
+  scanf("%s%s", s[0], s[1]);
+  for( int i = 0 ; i < 2; ++i )
+    {
+      len[i] = strlen( s[i] );
+      for( int j = 0, k = 0; j < len[i]; ++j )
+	{
+	  k = h[i][j + 1] = hasH( k, s[i][j]);
+	}
+    }
+  list<int> lst[2];
+  for( int i = 0; i < 2; ++i )
+    for( int j = 0; j < len[i]; ++j )
+      lst[i].push_back(j);
+  for( int i = 1, k = 37; i <= min( len[0], len[1])
+	 ; ++i, k = mulM( k, 37) )
+    {
+      unordered_map<int,int> st;
+      for( auto j : lst[0] )
+	if( j + i <= len[0] )
+	  {
+	    int tmp = subM( h[0][ j + i ], mulM( k, h[0][j] ) );
+	    ++st[tmp];
+	  }
+	else break;
+      int ok(0);
+      bool fd = false;
+      for( auto j = lst[1].begin(); j != lst[1].end(); )
+	if( *j + i <= len[1] )
+	  {
+	    int tmp = subM( h[1][ *j + i ], mulM( k, h[1][*j] ) );
+	    auto ite = st.find( tmp );
+	    if( ite != st.end() )
+	      {
+		fd = true;
+		if( ite->second == 1 )
+		  {
+		    ite->second = -1;
+		    ++ok;
+		  }
+		else if( ite->second == -1 )
+		  {
+		    ite->second = -2;
+		    --ok;
+		  }
+		else if( ite->second >= 0 )
+		  ite->second = -3;
+		++j;
+	      }
+	    else
+	      {
+		auto k = j;
+		++j;
+		lst[1].erase(k);
+	      }
+	  }
+	else break;
+      if( ok > 0 )
+	{
+	  printf("%d", i);
+	  return 0;
+	}
+      // for( auto j = lst[0].begin(); j != lst[0].end(); )
+      // 	{
+      // 	  int tmp = subM( h[0][ *j + i ], mulM( k, h[0][*j] ) ) ;
+      // 	  auto ite = st.find(tmp);
+      // 	  if( ite == st.end() || ite->second >= 0 )
+      // 	    {
+      // 	      auto k = j;
+      // 	      ++j;
+      // 	      lst[0].erase(k);
+      // 	    }
+      // 	  else ++j;
+      // 	}
+      if( !fd )
+	break;
+    }
+  printf("-1");
+  return 0;
+}
